@@ -88,9 +88,10 @@ class CoordFormatter:
     book_num_of_lines = BOOKS_NUM_OF_LINES[book_idx]
     if not 0 <= round(x) < book_num_of_lines:
       return ""
-    line_number = round(x)
+    line_idx = round(x)
+    line_number = line_idx + 1
     try:
-      frequency = self.__book_line_numbers_dicts[book_idx][line_number]
+      frequency = self.__book_line_numbers_dicts[book_idx][line_idx]
     except:
       frequency = 0
     return "Book: %d, Line: %d / %d, Frequency: %d" % (book_number, line_number, book_num_of_lines, frequency)
