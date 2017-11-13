@@ -5,6 +5,9 @@ import numpy
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.ticker as ticker
+import pickle
+from coord_formatter import CoordFormatter
+
 
 PLOT_TITLE = "Lines of Paradise Lost quoted in the Oxford English Dictionary"
 PLOT_XLABEL = "Line Number"
@@ -30,6 +33,7 @@ NUM_OF_BOOKS = 12
 BOOK_NUM_OF_LINES = [798, 1055, 742, 1015, 907, 912, 640, 653, 1189, 1104, 901, 649]
 REGEX_OED_BOOK_LINE_NUMBERS = "(BOOK\s+\d+\s+(?P<line_numbers>(\d+\,\s*)*\d+)\s*)+"
 
+
 def RGBTripletToHex(rgb_triplet):
   assert len(rgb_triplet) == 3
   color_channel_hex_list = [None] * 3
@@ -44,17 +48,6 @@ def RGBTripletToHex(rgb_triplet):
     color_channel_hex_list[i] = color_channel_hex
   rgb_hex = "".join(["#"] + color_channel_hex_list)
   return rgb_hex
-
-#adapted (heavily modified) from http://matplotlib.org/examples/api/image_zcoord.html
-def format_coord(x, y):
-  line_number = round(x)
-  book_number = min(max(1, NUM_OF_BOOKS - int(round(y))), NUM_OF_BOOKS)
-  book_idx = book_number - 1
-  try:
-    frequency = book_line_numbers_dicts[book_idx][line_number]
-  except:
-    frequency = 0
-  return "Book: %d, Line: %d, Frequency: %d" % (book_number, line_number, frequency)
 
 #aided by https://stackoverflow.com/questions/45305785/factors-and-shifts-in-offsets-for-matplotlib-axes-labels, ImportanceOfBeingErnest's answer
 class ShiftUpFormatter(ticker.ScalarFormatter):
@@ -200,7 +193,7 @@ for i in range(len(plot_sets)):
   plt.barh(plot_ind, values, BAR_GRAPH_HEIGHT, color=color, left=book_bar_graph_lengths)
   for j in range(NUM_OF_BOOKS):
     book_bar_graph_lengths[j] += values[j]
-  print("{} / {}".format(i, len(plot_sets)), end="\r")
+  print("{} / {}".format(i + 1, len(plot_sets)), end="\r")
 
 frequency_color_patches = [None] * (max_frequency + 1)
 for i in range(max_frequency + 1):
@@ -211,10 +204,19 @@ plt.yticks(numpy.arange(NUM_OF_BOOKS), range(NUM_OF_BOOKS, 0, -1))
 
 #aided by https://stackoverflow.com/questions/15067668/how-to-get-a-matplotlib-axes-instance-to-plot-to, wim's answer
 ax = plt.gca()
-ax.format_coord = format_coord
+coord_formatter = CoordFormatter(NUM_OF_BOOKS, book_line_numbers_dicts)
+ax.format_coord = coord_formatter.format_coord
 
 plt.title(PLOT_TITLE)
 ax.set_ylabel(PLOT_YLABEL)
 ax.set_xlabel(PLOT_XLABEL)
 plt.legend(title="Frequency", handles=frequency_color_patches, loc=PLOT_LEGEND_POSITION)
+
+#aided by https://stackoverflow.com/questions/4348733/saving-interactive-matplotlib-figures, pelson's / Peter Mortensen's and Demis's / Community's answer
+fig = plt.gcf()
+with open("plot.bin", 'wb') as plot_file:
+  pickle.dump(NUM_OF_BOOKS, plot_file)
+  pickle.dump(book_line_numbers_dicts, plot_file)
+  pickle.dump(fig, plot_file)
+
 plt.show()
