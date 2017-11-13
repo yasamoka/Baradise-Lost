@@ -1,35 +1,35 @@
+import json
 import regex
 
-OED_DOCUMENT = "OED.txt"
-NUM_OF_BOOKS = 12
-BOOKS_NUM_OF_LINES = [798, 1055, 742, 1015, 907, 912, 640, 653, 1189, 1104, 901, 649]
-REGEX_OED_BOOK_LINE_NUMBERS = "(BOOK\s+\d+\s+(?P<line_numbers>(\d+\,\s*)*\d+)\s*)+"
+books_line_numbers_json_filepath = "OED.json"
+#NUM_OF_BOOKS = 12
+#BOOKS_NUM_OF_LINES = [798, 1055, 742, 1015, 907, 912, 640, 653, 1189, 1104, 901, 649]
+#REGEX_OED_BOOK_LINE_NUMBERS = "(BOOK\s+\d+\s+(?P<line_numbers>(\d+\,\s*)*\d+)\s*)+"
 
 def get_book_line_numbers():
-  with open(OED_DOCUMENT) as oed_document_file:
-    oed_document_text = oed_document_file.read()
+  with open(books_line_numbers_json_filepath) as books_line_numbers_json_file:
+    books = json.load(books_line_numbers_json_file)
 
-  regex_match_obj = regex.match(REGEX_OED_BOOK_LINE_NUMBERS, oed_document_text)
-  books_line_numbers_text = regex_match_obj.captures("line_numbers")
-  assert len(books_line_numbers_text) == NUM_OF_BOOKS
-  book_line_numbers_dicts = [None] * NUM_OF_BOOKS
-  for i in range(NUM_OF_BOOKS):
-    book_line_numbers_text = books_line_numbers_text[i]
-    book_line_numbers_text_clean = book_line_numbers_text.replace("\r", " ")
-    book_line_numbers_text_clean = book_line_numbers_text_clean.replace("\n", " ")
-    book_line_numbers_text_clean = book_line_numbers_text_clean.replace("\t", " ")
-    book_line_numbers_text_clean = book_line_numbers_text_clean.strip(" ")
-    book_line_numbers_text_split = book_line_numbers_text_clean.split(",")
+  num_of_books = len(books)
+  book_titles = [None] * num_of_books
+  books_num_of_lines = [None] * num_of_books
+  book_line_numbers_dicts = [None] * num_of_books
+  for i in range(num_of_books):
+    book = books[i]
+    book_title = book["title"]
+    book_num_of_lines = book["num_of_lines"]
+    book_line_numbers = book["line_numbers"]
     book_line_numbers_dict = dict()
-    for j in range(len(book_line_numbers_text_split)):
-      book_line_number_text = book_line_numbers_text_split[j]
-      book_line_number = int(book_line_number_text)
+    for j in range(len(book_line_numbers)):
+      book_line_number = book_line_numbers[j]
       try:
         book_line_numbers_dict[book_line_number] += 1
       except KeyError:
         book_line_numbers_dict[book_line_number] = 1
+    book_titles[i] = book_title
+    books_num_of_lines[i] = book_num_of_lines
     book_line_numbers_dicts[i] = book_line_numbers_dict
-  return book_line_numbers_dicts
+  return num_of_books, book_titles, books_num_of_lines, book_line_numbers_dicts
 
 def rgb_triplet_to_hex(rgb_triplet):
   assert len(rgb_triplet) == 3
@@ -72,7 +72,9 @@ def frequency_color_map_rgb_to_hex(frequency_color_map_rgb):
 
 #adapted (heavily modified) from http://matplotlib.org/examples/api/image_zcoord.html
 class CoordFormatter:
-  def __init__(self, book_line_numbers_dicts, offset=False):
+  def __init__(self, num_of_books, books_num_of_lines, book_line_numbers_dicts, offset=False):
+    self.__num_of_books = num_of_books
+    self.__books_num_of_lines = books_num_of_lines
     self.__book_line_numbers_dicts = book_line_numbers_dicts
     if offset:
       self.__offset = 1
@@ -80,12 +82,12 @@ class CoordFormatter:
       self.__offset = 0
 
   def format_coord(self, x, y):
-    if not self.__offset <= round(y) < (NUM_OF_BOOKS + self.__offset):
+    if not self.__offset <= round(y) < (self.__num_of_books + self.__offset):
       return ""
     #book_number = min(max(1, NUM_OF_BOOKS - int(round(y))), NUM_OF_BOOKS)
-    book_number = NUM_OF_BOOKS - int(round(y)) + self.__offset
+    book_number = self.__num_of_books - int(round(y)) + self.__offset
     book_idx = book_number - 1
-    book_num_of_lines = BOOKS_NUM_OF_LINES[book_idx]
+    book_num_of_lines = self.__books_num_of_lines[book_idx]
     if not 0 <= round(x) < book_num_of_lines:
       return ""
     line_idx = round(x)

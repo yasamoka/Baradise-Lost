@@ -26,14 +26,14 @@ MARKER_STYLE = '|'
 MARKER_SIZE = 100
 LINE_STYLE = 'solid'
 
-book_line_numbers_dicts = get_book_line_numbers()
+num_of_books, book_titles, books_num_of_lines, book_line_numbers_dicts = get_book_line_numbers()
 
-max_book_num_of_lines = max(BOOKS_NUM_OF_LINES)
+max_book_num_of_lines = max(books_num_of_lines)
 max_frequency = 0
-plot_frequencies_matrix = [[0] * NUM_OF_BOOKS for i in range(max_book_num_of_lines)]
+plot_frequencies_matrix = [[0] * num_of_books for i in range(max_book_num_of_lines)]
 for i in range(max_book_num_of_lines):
   line_number = i + 1
-  for book_idx in range(NUM_OF_BOOKS):
+  for book_idx in range(num_of_books):
     book_line_numbers_dict = book_line_numbers_dicts[book_idx]
     try:
       frequency = book_line_numbers_dict[line_number]
@@ -53,12 +53,12 @@ frequency_color_map_hex = frequency_color_map_rgb_to_hex(frequency_color_map_rgb
 #aided by https://stackoverflow.com/questions/15067668/how-to-get-a-matplotlib-axes-instance-to-plot-to, wim's answer
 ax = plt.gca()
 
-for book_idx in range(NUM_OF_BOOKS):
-  book_number_reversed = NUM_OF_BOOKS - book_idx
+for book_idx in range(num_of_books):
+  book_number_reversed = num_of_books - book_idx
   last_frequency = plot_frequencies_matrix[0][book_idx]
   plot_count = 1
   #for line_idx in range(1, max_book_num_of_lines - 1):
-  book_num_of_lines = BOOKS_NUM_OF_LINES[book_idx]
+  book_num_of_lines = books_num_of_lines[book_idx]
   for line_idx in range(1, book_num_of_lines - 1):
     frequency = plot_frequencies_matrix[line_idx][book_idx]
     if frequency == last_frequency:
@@ -86,9 +86,11 @@ for i in range(max_frequency + 1):
   frequency_color_patch = mpatches.Patch(color=frequency_color_map_hex[i], label="{}".format(i))
   frequency_color_patches[i] = frequency_color_patch
 
-plt.yticks(numpy.arange(NUM_OF_BOOKS + 1), [''] + list(range(NUM_OF_BOOKS, 0, -1)))
+book_titles_reversed = list(book_titles)
+book_titles_reversed.reverse()
+plt.yticks(numpy.arange(num_of_books + 1), [''] + book_titles_reversed)
 
-coord_formatter = CoordFormatter(book_line_numbers_dicts, offset=True)
+coord_formatter = CoordFormatter(num_of_books, books_num_of_lines, book_line_numbers_dicts, offset=True)
 ax.format_coord = coord_formatter.format_coord
 
 plt.title(PLOT_TITLE)
@@ -99,7 +101,7 @@ plt.legend(title="Frequency", handles=frequency_color_patches, loc=PLOT_LEGEND_P
 #aided by https://stackoverflow.com/questions/4348733/saving-interactive-matplotlib-figures, pelson's / Peter Mortensen's and Demis's / Community's answer
 fig = plt.gcf()
 with open("plot_line.bin", 'wb') as plot_file:
-  pickle.dump(NUM_OF_BOOKS, plot_file)
+  pickle.dump(num_of_books, plot_file)
   pickle.dump(book_line_numbers_dicts, plot_file)
   pickle.dump(fig, plot_file)
 

@@ -23,13 +23,13 @@ FREQUENCY_COLOR_RANGE = ((0, 127, 0), (0, 255, 0))
 NULL_COLOR_SINGLETON = (220, 242, 248)
 BAR_GRAPH_HEIGHT = 0.35
 
-book_line_numbers_dicts = get_book_line_numbers()
+num_of_books, book_titles, books_num_of_lines, book_line_numbers_dicts = get_book_line_numbers()
 
-max_book_num_of_lines = max(BOOKS_NUM_OF_LINES)
-plot_frequencies_matrix = [[0] * NUM_OF_BOOKS for i in range(max_book_num_of_lines)]
+max_book_num_of_lines = max(books_num_of_lines)
+plot_frequencies_matrix = [[0] * num_of_books for i in range(max_book_num_of_lines)]
 for i in range(max_book_num_of_lines):
   line_number = i + 1
-  for book_idx in range(NUM_OF_BOOKS):
+  for book_idx in range(num_of_books):
     book_line_numbers_dict = book_line_numbers_dicts[book_idx]
     try:
       frequency = book_line_numbers_dict[line_number]
@@ -37,14 +37,14 @@ for i in range(max_book_num_of_lines):
     except KeyError:
       pass
 
-book_plot_queues = [Queue() for book_idx in range(NUM_OF_BOOKS)]
+book_plot_queues = [Queue() for book_idx in range(num_of_books)]
 
-for book_idx in range(NUM_OF_BOOKS):
+for book_idx in range(num_of_books):
   book_plot_queue = book_plot_queues[book_idx]
   last_frequency = plot_frequencies_matrix[0][book_idx]
   last_frequency_count = 1
   #for line_number in range(1, max_book_num_of_lines):
-  book_num_of_lines = BOOKS_NUM_OF_LINES[book_idx]
+  book_num_of_lines = books_num_of_lines[book_idx]
   for line_number in range(1, book_num_of_lines):
     frequency = plot_frequencies_matrix[line_number][book_idx]
     if frequency == last_frequency:
@@ -60,16 +60,16 @@ for book_idx in range(NUM_OF_BOOKS):
 plot_sets = list()
 primary_queue_idx = 0
 primary_queue = book_plot_queues[primary_queue_idx]
-nonempty_queue_idx_list = [i for i in range(NUM_OF_BOOKS)]
+nonempty_queue_idx_list = [i for i in range(num_of_books)]
 book_idx_list = list(nonempty_queue_idx_list)
-last_num_of_nonempty_queues = num_of_nonempty_queues = NUM_OF_BOOKS
+last_num_of_nonempty_queues = num_of_nonempty_queues = num_of_books
 queues_to_be_removed_idx_list = list()
 finish = False
 while num_of_nonempty_queues > 0:
   primary_queue_idx = nonempty_queue_idx_list[0]
   primary_queue = book_plot_queues[primary_queue_idx]
   primary_frequency, primary_plot_count = primary_queue.get()
-  plot_counts = [0] * NUM_OF_BOOKS
+  plot_counts = [0] * num_of_books
   plot_counts[primary_queue_idx] = primary_plot_count
 
   num_of_nonempty_queues = len(nonempty_queue_idx_list)
@@ -109,16 +109,16 @@ else:
   frequency_color_map_rgb = generate_frequency_color_map_rgb(max_frequency, NULL_COLOR_SINGLETON, FREQUENCY_COLOR_RANGE)
 frequency_color_map_hex = frequency_color_map_rgb_to_hex(frequency_color_map_rgb)
 
-plot_ind = numpy.arange(NUM_OF_BOOKS)
+plot_ind = numpy.arange(num_of_books)
 
-book_bar_graph_lengths = [0.5] * NUM_OF_BOOKS
+book_bar_graph_lengths = [0.5] * num_of_books
 for i in range(len(plot_sets)):
   plot_set = plot_sets[i]
   frequency, values = plot_set
   values.reverse()
   color = frequency_color_map_hex[frequency]
   plt.barh(plot_ind, values, BAR_GRAPH_HEIGHT, color=color, left=book_bar_graph_lengths)
-  for j in range(NUM_OF_BOOKS):
+  for j in range(num_of_books):
     book_bar_graph_lengths[j] += values[j]
   print("{} / {}".format(i + 1, len(plot_sets)), end="\r")
 
@@ -127,11 +127,13 @@ for i in range(max_frequency + 1):
   frequency_color_patch = mpatches.Patch(color=frequency_color_map_hex[i], label="{}".format(i))
   frequency_color_patches[i] = frequency_color_patch
 
-plt.yticks(numpy.arange(NUM_OF_BOOKS), range(NUM_OF_BOOKS, 0, -1))
+book_titles_reversed = list(book_titles)
+book_titles_reversed.reverse()
+plt.yticks(numpy.arange(num_of_books), book_titles_reversed)
 
 #aided by https://stackoverflow.com/questions/15067668/how-to-get-a-matplotlib-axes-instance-to-plot-to, wim's answer
 ax = plt.gca()
-coord_formatter = CoordFormatter(book_line_numbers_dicts)
+coord_formatter = CoordFormatter(num_of_books, books_num_of_lines, book_line_numbers_dicts)
 ax.format_coord = coord_formatter.format_coord
 
 plt.title(PLOT_TITLE)
@@ -142,7 +144,7 @@ plt.legend(title="Frequency", handles=frequency_color_patches, loc=PLOT_LEGEND_P
 #aided by https://stackoverflow.com/questions/4348733/saving-interactive-matplotlib-figures, pelson's / Peter Mortensen's and Demis's / Community's answer
 fig = plt.gcf()
 with open("plot_bar.bin", 'wb') as plot_file:
-  pickle.dump(NUM_OF_BOOKS, plot_file)
+  pickle.dump(num_of_books, plot_file)
   pickle.dump(book_line_numbers_dicts, plot_file)
   pickle.dump(fig, plot_file)
 
