@@ -1,12 +1,7 @@
 import json
 import regex
 
-books_line_numbers_json_filepath = "OED.json"
-#NUM_OF_BOOKS = 12
-#BOOKS_NUM_OF_LINES = [798, 1055, 742, 1015, 907, 912, 640, 653, 1189, 1104, 901, 649]
-#REGEX_OED_BOOK_LINE_NUMBERS = "(BOOK\s+\d+\s+(?P<line_numbers>(\d+\,\s*)*\d+)\s*)+"
-
-def get_book_line_numbers():
+def get_book_line_numbers(books_line_numbers_json_filepath):
   with open(books_line_numbers_json_filepath) as books_line_numbers_json_file:
     books = json.load(books_line_numbers_json_file)
 

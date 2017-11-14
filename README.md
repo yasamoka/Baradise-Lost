@@ -15,28 +15,26 @@ pip install -r requirements.txt
 
 ## Usage
 
-To generate a bar plot:
+To generate a plot:
 ```
-python generate_barplot.py lines.json
-```
-
-To generate a scatter plot:
-```
-python generate_scatterplot.py lines.json
-```
-
-To generate a line plot:
-```
-python generate_lineplot.py lines.json
+python generate_plot.py {plot_type} {json_file}
 ```
 
 To load a previously generated plot:
 ```
 python load_plot.py {plot_type}
 ```
+
 Where {plot_type} is "bar", "scatter", or "line".
 
-For example, to load a previously generated bar plot:
+## Examples
+
+To generate a bar plot:
+```
+python generate_plot.py bar lines.json
+```
+
+To load a previously generated bar plot:
 ```
 python load_plot.py bar
 ```
