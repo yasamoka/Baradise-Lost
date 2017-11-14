@@ -8,7 +8,7 @@ Requires Python 3. Tested on Python 3.6.
 
 ## Dependencies
 
-How to install required dependencies:
+To install required dependencies:
 ```
 pip install -r requirements.txt
 ```
