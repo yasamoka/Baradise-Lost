@@ -3,7 +3,6 @@ from queue import Queue
 import numpy
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-import matplotlib.lines as lines
 import pickle
 from util import *
 
@@ -33,12 +32,6 @@ plot_type = sys.argv[1]
 books_line_numbers_json_filepath = sys.argv[2]
 
 num_of_books, book_titles, books_num_of_lines, book_line_numbers_dicts = get_book_line_numbers(books_line_numbers_json_filepath)
-
-if USE_CUSTOM_COLOR_MAP:
-  frequency_color_map_rgb = CUSTOM_COLOR_MAP
-else:
-  frequency_color_map_rgb = generate_frequency_color_map_rgb(max_frequency, NULL_COLOR_SINGLETON, FREQUENCY_COLOR_RANGE)
-frequency_color_map_hex = frequency_color_map_rgb_to_hex(frequency_color_map_rgb)
 
 book_titles_reversed = list(book_titles)
 book_titles_reversed.reverse()
@@ -120,6 +113,12 @@ if plot_type == "bar":
     frequency = plot_set[0]
     max_frequency = max(frequency, max_frequency)
 
+  if USE_CUSTOM_COLOR_MAP:
+    frequency_color_map_rgb = CUSTOM_COLOR_MAP
+  else:
+    frequency_color_map_rgb = generate_frequency_color_map_rgb(max_frequency, NULL_COLOR_SINGLETON, FREQUENCY_COLOR_RANGE)
+  frequency_color_map_hex = frequency_color_map_rgb_to_hex(frequency_color_map_rgb)
+
   plot_ind = numpy.arange(num_of_books)
 
   book_bar_graph_lengths = [0.5] * num_of_books
@@ -131,7 +130,8 @@ if plot_type == "bar":
     plt.barh(plot_ind, values, BAR_GRAPH_HEIGHT, color=color, left=book_bar_graph_lengths)
     for j in range(num_of_books):
       book_bar_graph_lengths[j] += values[j]
-    print("{} / {}".format(i + 1, len(plot_sets)), end="\r")
+    #print("{} / {}".format(i + 1, len(plot_sets)), end="\r")
+    print("{} / {}".format(i + 1, len(plot_sets)))
 
   coord_formatter = CoordFormatter(num_of_books, books_num_of_lines, book_line_numbers_dicts)
   plt.yticks(numpy.arange(num_of_books), book_titles_reversed)
@@ -140,13 +140,13 @@ elif plot_type == "scatter":
   max_frequency = 0
   plot_frequencies_matrix = [[0] * num_of_books for i in range(max_book_num_of_lines)]
   frequency_points_list_dict = dict()
-  for i in range(max_book_num_of_lines):
-    line_number = i + 1
+  for line_idx in range(max_book_num_of_lines):
+    line_number = line_idx + 1
     for book_idx in range(num_of_books):
       book_line_numbers_dict = book_line_numbers_dicts[book_idx]
       try:
         frequency = book_line_numbers_dict[line_number]
-        plot_frequencies_matrix[i][book_idx] = frequency
+        plot_frequencies_matrix[line_idx][book_idx] = frequency
         max_frequency = max(frequency, max_frequency)
         try:
           frequency_points_x_list, frequency_points_y_list = frequency_points_list_dict[frequency]
@@ -158,54 +158,21 @@ elif plot_type == "scatter":
       except KeyError:
         pass
 
+  if USE_CUSTOM_COLOR_MAP:
+    frequency_color_map_rgb = CUSTOM_COLOR_MAP
+  else:
+    frequency_color_map_rgb = generate_frequency_color_map_rgb(max_frequency, NULL_COLOR_SINGLETON, FREQUENCY_COLOR_RANGE)
+  frequency_color_map_hex = frequency_color_map_rgb_to_hex(frequency_color_map_rgb)
+
   for frequency in frequency_points_list_dict:
     color = frequency_color_map_hex[frequency]
     frequency_points_x_list, frequency_points_y_list = frequency_points_list_dict[frequency]
     plt.scatter(frequency_points_x_list, frequency_points_y_list, color=color, marker=MARKER_STYLE, s=MARKER_SIZE)
-  
+
   coord_formatter = CoordFormatter(num_of_books, books_num_of_lines, book_line_numbers_dicts, offset=True)
   plt.yticks(numpy.arange(num_of_books + 1), [''] + book_titles_reversed)
-elif plot_type == "line":
-  max_book_num_of_lines = max(books_num_of_lines)
-  max_frequency = 0
-  plot_frequencies_matrix = [[0] * num_of_books for i in range(max_book_num_of_lines)]
-  for i in range(max_book_num_of_lines):
-    line_number = i + 1
-    for book_idx in range(num_of_books):
-      book_line_numbers_dict = book_line_numbers_dicts[book_idx]
-      try:
-        frequency = book_line_numbers_dict[line_number]
-        plot_frequencies_matrix[i][book_idx] = frequency
-        max_frequency = max(frequency, max_frequency)
-      except KeyError:
-        pass
-
-  for book_idx in range(num_of_books):
-    book_number_reversed = num_of_books - book_idx
-    last_frequency = plot_frequencies_matrix[0][book_idx]
-    plot_count = 1
-    book_num_of_lines = books_num_of_lines[book_idx]
-    for line_idx in range(1, book_num_of_lines - 1):
-      frequency = plot_frequencies_matrix[line_idx][book_idx]
-      if frequency == last_frequency:
-        plot_count += 1
-      else:
-        color = frequency_color_map_hex[last_frequency]
-        line_number_start = line_idx - plot_count + 1
-        line_number_end = line_idx + 1
-        line_number_range = list(range(line_number_start, line_number_end))
-        book_number_reversed_range = [book_number_reversed] * plot_count
-        ax.plot(line_number_range, book_number_reversed_range, marker=MARKER_STYLE, color=color, ls=LINE_STYLE)
-        last_frequency = frequency
-        plot_count = 1
-    color = frequency_color_map_hex[last_frequency]
-    line_number_start = book_num_of_lines - plot_count
-    line_number_end = book_num_of_lines
-    line_number_range = list(range(line_number_start, line_number_end))
-    book_number_reversed_range = [book_number_reversed] * plot_count
-    ax.plot(line_number_range, book_number_reversed_range, marker=MARKER_STYLE, color=color, ls=LINE_STYLE)
-
-  coord_formatter = CoordFormatter(num_of_books, books_num_of_lines, book_line_numbers_dicts, offset=True)
+else:
+  raise Exception("Invalid plot type.")
 
 frequency_color_patches = [None] * (max_frequency + 1)
 for i in range(max_frequency + 1):

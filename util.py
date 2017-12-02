@@ -1,5 +1,5 @@
 import json
-import regex
+import numpy
 
 def get_book_line_numbers(books_line_numbers_json_filepath):
   with open(books_line_numbers_json_filepath) as books_line_numbers_json_file:
@@ -79,16 +79,14 @@ class CoordFormatter:
   def format_coord(self, x, y):
     if not self.__offset <= round(y) < (self.__num_of_books + self.__offset):
       return ""
-    #book_number = min(max(1, NUM_OF_BOOKS - int(round(y))), NUM_OF_BOOKS)
     book_number = self.__num_of_books - int(round(y)) + self.__offset
     book_idx = book_number - 1
     book_num_of_lines = self.__books_num_of_lines[book_idx]
-    if not 0 <= round(x) < book_num_of_lines:
+    line_number = round(x)
+    if not 0 < line_number <= book_num_of_lines:
       return ""
-    line_idx = round(x)
-    line_number = line_idx + 1
     try:
-      frequency = self.__book_line_numbers_dicts[book_idx][line_idx]
+      frequency = self.__book_line_numbers_dicts[book_idx][line_number]
     except:
       frequency = 0
     return "Book: %d, Line: %d / %d, Frequency: %d" % (book_number, line_number, book_num_of_lines, frequency)
