@@ -4,6 +4,7 @@ import numpy
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import pickle
+from progressbar import ProgressBar, SimpleProgress, Bar, Timer
 from util import *
 
 PLOT_TITLE = "Lines of Paradise Lost quoted in the Oxford English Dictionary"
@@ -122,6 +123,7 @@ if plot_type == "bar":
   plot_ind = numpy.arange(num_of_books)
 
   book_bar_graph_lengths = [0.5] * num_of_books
+  progress_bar = ProgressBar(max_value=len(plot_sets), widgets=[SimpleProgress(format='%(value_s)s / %(max_value_s)s'), ' | ', Bar(), Timer()])
   for i in range(len(plot_sets)):
     plot_set = plot_sets[i]
     frequency, values = plot_set
@@ -130,8 +132,8 @@ if plot_type == "bar":
     plt.barh(plot_ind, values, BAR_GRAPH_HEIGHT, color=color, left=book_bar_graph_lengths)
     for j in range(num_of_books):
       book_bar_graph_lengths[j] += values[j]
-    #print("{} / {}".format(i + 1, len(plot_sets)), end="\r")
-    print("{} / {}".format(i + 1, len(plot_sets)))
+    progress_bar.update(i)
+
 
   coord_formatter = CoordFormatter(num_of_books, books_num_of_lines, book_line_numbers_dicts)
   plt.yticks(numpy.arange(num_of_books), book_titles_reversed)
