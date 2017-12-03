@@ -133,7 +133,7 @@ if plot_type == "bar":
     for j in range(num_of_books):
       book_bar_graph_lengths[j] += values[j]
     progress_bar.update(i + 1)
-
+  progress_bar.finish()
 
   coord_formatter = CoordFormatter(num_of_books, books_num_of_lines, book_line_numbers_dicts)
   plt.yticks(numpy.arange(num_of_books), book_titles_reversed)
