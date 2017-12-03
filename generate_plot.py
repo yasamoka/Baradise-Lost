@@ -132,7 +132,7 @@ if plot_type == "bar":
     plt.barh(plot_ind, values, BAR_GRAPH_HEIGHT, color=color, left=book_bar_graph_lengths)
     for j in range(num_of_books):
       book_bar_graph_lengths[j] += values[j]
-    progress_bar.update(i)
+    progress_bar.update(i + 1)
 
 
   coord_formatter = CoordFormatter(num_of_books, books_num_of_lines, book_line_numbers_dicts)
