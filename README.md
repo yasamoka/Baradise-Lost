@@ -25,7 +25,7 @@ To load a previously generated plot:
 python load_plot.py {plot_type}
 ```
 
-Where {plot_type} is "bar", "scatter", or "line".
+Where {plot_type} is "bar" or "scatter".
 
 ## Examples
 
