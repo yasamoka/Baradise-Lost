@@ -1,6 +1,6 @@
 # Baradise Lost
 
-A Book Line Number Quotation Frequency Bar Graph Plotter
+A Book Line Quotation Frequency Bar Graph Plotter
 
 ## Requirements
 
