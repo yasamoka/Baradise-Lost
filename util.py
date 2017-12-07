@@ -87,6 +87,6 @@ class CoordFormatter:
       return ""
     try:
       frequency = self.__book_line_numbers_dicts[book_idx][line_number]
-    except:
+    except KeyError:
       frequency = 0
     return "Book: %d, Line: %d / %d, Frequency: %d" % (book_number, line_number, book_num_of_lines, frequency)

@@ -36,12 +36,9 @@ num_of_books, book_titles, books_num_of_lines, book_line_numbers_dicts = get_boo
 
 book_titles_reversed = list(book_titles)
 book_titles_reversed.reverse()
-
-#aided by https://stackoverflow.com/questions/15067668/how-to-get-a-matplotlib-axes-instance-to-plot-to, wim's answer
-ax = plt.gca()
+max_book_num_of_lines = max(books_num_of_lines)
 
 if plot_type == "bar":
-  max_book_num_of_lines = max(books_num_of_lines)
   plot_frequencies_matrix = [[0] * num_of_books for i in range(max_book_num_of_lines)]
   for i in range(max_book_num_of_lines):
     line_number = i + 1
@@ -138,7 +135,6 @@ if plot_type == "bar":
   coord_formatter = CoordFormatter(num_of_books, books_num_of_lines, book_line_numbers_dicts)
   plt.yticks(numpy.arange(num_of_books), book_titles_reversed)
 elif plot_type == "scatter":
-  max_book_num_of_lines = max(books_num_of_lines)
   max_frequency = 0
   plot_frequencies_matrix = [[0] * num_of_books for i in range(max_book_num_of_lines)]
   frequency_points_list_dict = dict()
@@ -181,6 +177,8 @@ for i in range(max_frequency + 1):
   frequency_color_patch = mpatches.Patch(color=frequency_color_map_hex[i], label="{}".format(i))
   frequency_color_patches[i] = frequency_color_patch
 
+#aided by https://stackoverflow.com/questions/15067668/how-to-get-a-matplotlib-axes-instance-to-plot-to, wim's answer
+ax = plt.gca()
 ax.format_coord = coord_formatter.format_coord
 
 plt.title(PLOT_TITLE)
