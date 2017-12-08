@@ -4,6 +4,7 @@ import numpy
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import pickle
+import mpld3
 from progressbar import ProgressBar, SimpleProgress, Bar, Timer
 from util import *
 
@@ -37,6 +38,8 @@ num_of_books, book_titles, books_num_of_lines, book_line_numbers_dicts = get_boo
 book_titles_reversed = list(book_titles)
 book_titles_reversed.reverse()
 max_book_num_of_lines = max(books_num_of_lines)
+
+ax = plt.gca()
 
 if plot_type == "bar":
   plot_frequencies_matrix = [[0] * num_of_books for i in range(max_book_num_of_lines)]
@@ -126,7 +129,7 @@ if plot_type == "bar":
     frequency, values = plot_set
     values.reverse()
     color = frequency_color_map_hex[frequency]
-    plt.barh(plot_ind, values, BAR_GRAPH_HEIGHT, color=color, left=book_bar_graph_lengths)
+    ax.barh(plot_ind, values, BAR_GRAPH_HEIGHT, color=color, left=book_bar_graph_lengths)
     for j in range(num_of_books):
       book_bar_graph_lengths[j] += values[j]
     progress_bar.update(i + 1)
@@ -165,7 +168,7 @@ elif plot_type == "scatter":
   for frequency in frequency_points_list_dict:
     color = frequency_color_map_hex[frequency]
     frequency_points_x_list, frequency_points_y_list = frequency_points_list_dict[frequency]
-    plt.scatter(frequency_points_x_list, frequency_points_y_list, color=color, marker=MARKER_STYLE, s=MARKER_SIZE)
+    ax.scatter(frequency_points_x_list, frequency_points_y_list, color=color, marker=MARKER_STYLE, s=MARKER_SIZE)
 
   coord_formatter = CoordFormatter(num_of_books, books_num_of_lines, book_line_numbers_dicts, offset=True)
   plt.yticks(numpy.arange(num_of_books + 1), [''] + book_titles_reversed)
@@ -178,7 +181,6 @@ for i in range(max_frequency + 1):
   frequency_color_patches[i] = frequency_color_patch
 
 #aided by https://stackoverflow.com/questions/15067668/how-to-get-a-matplotlib-axes-instance-to-plot-to, wim's answer
-ax = plt.gca()
 ax.format_coord = coord_formatter.format_coord
 
 plt.title(PLOT_TITLE)
@@ -188,6 +190,10 @@ plt.legend(title=PLOT_LEGEND_TITLE, handles=frequency_color_patches, loc=PLOT_LE
 
 #aided by https://stackoverflow.com/questions/4348733/saving-interactive-matplotlib-figures, pelson's / Peter Mortensen's and Demis's / Community's answer
 fig = plt.gcf()
+html = mpld3.fig_to_html(fig)
+html_filename = "{}_plot.html".format(plot_type)
+with open(html_filename, 'w') as html_file:
+  html_file.write(html)
 plot_filename = "{}_plot.bin".format(plot_type)
 with open(plot_filename, 'wb') as plot_file:
   pickle.dump(num_of_books, plot_file)
