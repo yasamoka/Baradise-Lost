@@ -76,7 +76,7 @@ def rgb_triplet_to_hex(rgb_triplet):
     assert 0 <= color_channel <= 255
     color_channel_int = int(color_channel)
     if color_channel_int:
-      color_channel_hex = "{:0x}".format(color_channel_int)
+      color_channel_hex = "{:02x}".format(color_channel_int)
     else:
       color_channel_hex = "00"
     color_channel_hex_list[i] = color_channel_hex
