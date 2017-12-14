@@ -2,9 +2,11 @@ import sys
 import matplotlib.pyplot as plt
 import pickle
 
-plot_type = sys.argv[1]
+plot_mode = int(sys.argv[1])
+plot_type = sys.argv[2]
 
-with open("{}_plot.bin".format(plot_type), 'rb') as plot_file:
+plot_filename = "m_{}_t_{}.bin".format(plot_mode, plot_type)
+with open(plot_filename, 'rb') as plot_file:
   NUM_OF_BOOKS = pickle.load(plot_file)
   book_line_numbers_dicts = pickle.load(plot_file)
   fig = pickle.load(plot_file)
