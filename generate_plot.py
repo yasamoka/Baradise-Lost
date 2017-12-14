@@ -7,36 +7,17 @@ import pickle
 from progressbar import ProgressBar, SimpleProgress, Bar, Timer
 from util import *
 
-PLOT_XLABEL = "Line Number"
-PLOT_YLABEL = "Book"
-PLOT_LEGEND_POSITION = "upper right"
-# color palette adapted from https://commons.wikimedia.org/wiki/File:Abortion_Laws.svg
-CUSTOM_COLOR_MAP = (
-  (225, 225, 225), # light grey
-  (204, 0, 0), # red
-  #(245, 121, 0), # orange
-  (237, 212, 0), # yellow
-  (115, 210, 22), # green
-  (52, 101, 164), # blue
-)
-BAR_GRAPH_HEIGHT = 0.35
-MARKER_STYLE = '|'
-MARKER_SIZE = 100
-
 plot_mode = int(sys.argv[1])
 plot_type = sys.argv[2]
 books_line_numbers_json_filepath = sys.argv[3]
+style_json_filepath = sys.argv[4]
 
 if plot_mode == 1:
-  PLOT_TITLE = "Lines of Paradise Lost quoted in the Oxford English Dictionary"
-  PLOT_LEGEND_TITLE = "Frequency"
   num_of_books, book_titles, books_num_of_lines, book_line_numbers_dicts = get_book_line_numbers_mode_1(books_line_numbers_json_filepath)
   book_titles_reversed = list(book_titles)
   book_titles_reversed.reverse()
   max_book_num_of_lines = max(books_num_of_lines)
 elif plot_mode == 2:
-  PLOT_TITLE = "Lines of Paradise Lost quoted in The Oxford Dictionary of Quotations"
-  PLOT_LEGEND_TITLE = "Editions"
   num_of_books, book_titles, books_num_of_lines, edition_numbers, book_line_numbers_dicts_raw = get_book_line_numbers_mode_2(books_line_numbers_json_filepath)
   total_num_of_lines = sum(books_num_of_lines)
   num_of_editions = len(edition_numbers)
@@ -69,6 +50,18 @@ elif plot_mode == 2:
   labels = get_edition_numbers_quoted_strings(edition_numbers)
 else:
   raise Exception("Invalid plot mode ({}).".format(plot_mode))
+
+with open(style_json_filepath) as style_json_file:
+  style = json.load(style_json_file)
+PLOT_TITLE = style["plot_title"]
+PLOT_XLABEL = style["plot_x_label"]
+PLOT_YLABEL = style["plot_y_label"]
+PLOT_BAR_GRAPH_HEIGHT = style["plot_bar_graph_height"]
+PLOT_SCATTER_MARKER_STYLE = style["plot_scatter_marker_style"]
+PLOT_SCATTER_MARKER_SIZE = style["plot_scatter_marker_size"]
+PLOT_LEGEND_TITLE = style["plot_legend_title"]
+PLOT_LEGEND_POSITION = style["plot_legend_position"]
+PLOT_COLOR_MAP = style["color_map"]
 
 ax = plt.gca()
 
@@ -148,8 +141,7 @@ if plot_type == "bar":
     num_of_legend_entries += 1
     labels = [str(i) for i in range(num_of_legend_entries)]
 
-  color_map_rgb = CUSTOM_COLOR_MAP
-  color_map_hex = color_map_rgb_to_hex(color_map_rgb)
+  color_map_hex = color_map_rgb_to_hex(PLOT_COLOR_MAP)
 
   plot_ind = numpy.arange(num_of_books)
 
@@ -160,7 +152,7 @@ if plot_type == "bar":
     frequency, values = plot_set
     values.reverse()
     color = color_map_hex[frequency]
-    ax.barh(plot_ind, values, BAR_GRAPH_HEIGHT, color=color, left=book_bar_graph_lengths)
+    ax.barh(plot_ind, values, PLOT_BAR_GRAPH_HEIGHT, color=color, left=book_bar_graph_lengths)
     for j in range(num_of_books):
       book_bar_graph_lengths[j] += values[j]
     progress_bar.update(i + 1)
@@ -191,8 +183,7 @@ elif plot_type == "scatter":
       except KeyError:
         pass
 
-  color_map_rgb = CUSTOM_COLOR_MAP
-  color_map_hex = color_map_rgb_to_hex(color_map_rgb)
+  color_map_hex = color_map_rgb_to_hex(PLOT_COLOR_MAP)
 
   if plot_mode == 1:
     num_of_legend_entries += 1
@@ -201,7 +192,7 @@ elif plot_type == "scatter":
   for frequency in frequency_points_list_dict:
     color = color_map_hex[frequency]
     frequency_points_x_list, frequency_points_y_list = frequency_points_list_dict[frequency]
-    ax.scatter(frequency_points_x_list, frequency_points_y_list, color=color, marker=MARKER_STYLE, s=MARKER_SIZE)
+    ax.scatter(frequency_points_x_list, frequency_points_y_list, color=color, marker=PLOT_SCATTER_MARKER_STYLE, s=PLOT_SCATTER_MARKER_SIZE)
 
   coord_formatter = CoordFormatter(book_titles, books_num_of_lines, book_line_numbers_dicts, labels, plot_mode, offset=True)
   plt.yticks(numpy.arange(num_of_books + 1), [''] + book_titles_reversed)
