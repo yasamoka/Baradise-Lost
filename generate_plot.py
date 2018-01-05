@@ -14,6 +14,7 @@ plot_type = sys.argv[2]
 plotter = sys.argv[3]
 books_line_numbers_json_filepath = sys.argv[4]
 style_json_filepath = sys.argv[5]
+output_html_filepath = sys.argv[6]
 
 if plot_mode == 1:
   num_of_books, book_titles, books_num_of_lines, book_line_numbers_dicts = get_book_line_numbers_mode_1(books_line_numbers_json_filepath)
@@ -208,7 +209,7 @@ if plot_type == "bar":
       yaxis=dict(title=PLOT_Y_LABEL),
       barmode='stack')
     fig = plotly.graph_objs.Figure(data=data, layout=layout)
-    plotly.offline.plot(fig, filename='test.html')
+    plotly.offline.plot(fig, filename=output_html_filepath)
     sys.exit(0)
   else:
     raise Exception("Invalid plotter ({}).".format(plotter))

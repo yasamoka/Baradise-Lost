@@ -17,22 +17,23 @@ pip install -r requirements.txt
 
 To generate a plot:
 ```
-python generate_plot.py {plot_mode} {plot_type} {book_line_numbers_json_file} {style_json_file}
+python generate_plot.py {plot_mode} {plot_type} {plotter} {book_line_numbers_json_file} {style_json_file} {output_html}
 ```
 
-To load a previously generated plot:
+To load a previously generated plot (only for the matplotlib plotter "mpl"):
 ```
 python load_plot.py {plot_mode} {plot_type}
 ```
 
 {plot_mode}: "1" (Frequency), "2" (Edition Numbers)
 {plot_type}: "bar", "scatter"
+{plotter}: "mpl" (matplotlib), "py" (plot.ly)
 
 ## Examples
 
-To generate a bar plot:
+To generate a bar plot of mode Frequency using the plotter plot.ly:
 ```
-python generate_plot.py 1 bar lines.json style.json
+python generate_plot.py 1 bar py lines.json style.json out.html
 ```
 
 To load a previously generated bar plot:
