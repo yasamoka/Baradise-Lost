@@ -31,7 +31,7 @@ python load_plot.py {plot_mode} {plot_type}
 
 ## Examples
 
-To generate a bar plot of mode Frequency using the plotter plot.ly:
+To generate a bar plot using the "Frequency" mode and the "plot.ly" plotter:
 ```
 python generate_plot.py 1 bar py lines.json style.json out.html
 ```
